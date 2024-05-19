@@ -33,20 +33,26 @@ import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role.Companion.Image
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,12 +117,19 @@ class MainActivity : ComponentActivity() {
         val chatState = chtViewModel.chatState.collectAsState().value
 
         val bitmap =getBitmap()
+        Box(modifier = Modifier.fillMaxSize()){
+            Image(painter = painterResource(id = R.drawable.bg),
+                contentDescription = "Background",
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.matchParentSize())
+        }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding()),
-            verticalArrangement = Arrangement.Bottom
+
+            verticalArrangement = Arrangement.Bottom,
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -175,14 +188,25 @@ class MainActivity : ComponentActivity() {
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                TextField(
-                    modifier = Modifier.weight(1f)
-                        ,value = chatState.prompt, onValueChange = {
-                   chtViewModel.onEvent(ChatUIEvent.UpdatePrompt(it))
+                OutlinedTextField(
+                    modifier = Modifier
+                        .weight(1f)
+                        .weight(2f),
+                    value = chatState.prompt,
+                    textStyle = TextStyle(color = Color.Black),
+                    onValueChange = {
+                   chtViewModel.onEvent(ChatUIEvent.UpdatePrompt(it),
+                       )
                 },
+
                 placeholder = {
-                    Text(text = "Type a prompt")
-                }
+                    Text(text = "Type a prompt",color=MaterialTheme.colorScheme.primary)
+                },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White
+                    )
+
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -191,7 +215,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .size(40.dp)
                         .clickable {
-                           chtViewModel.onEvent(ChatUIEvent.SendPrompt(chatState.prompt,bitmap))
+                            chtViewModel.onEvent(ChatUIEvent.SendPrompt(chatState.prompt, bitmap))
                             uriState.update { "" }
                         },
                     imageVector = Icons.Rounded.Send,
